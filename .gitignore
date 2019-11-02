@@ -1,0 +1,11 @@
+# venv
+bin/
+lib/
+include/
+pyvenv.cfg
+
+# setuptools
+build/
+dist/
+
+__pycache__
