@@ -86,6 +86,9 @@ def save_executable(data: bytes, base_dir: str):
 
     with open(output_path, 'wb') as fp:
         fp.write(data)
+
+        # Mark as executable.
+        # https://stackoverflow.com/a/14105527
         mode = fstat(fp.fileno()).st_mode
         mode |= 0o111
         fchmod(fp.fileno(), mode & 0o7777)
