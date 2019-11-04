@@ -1,0 +1,7 @@
+- id: shellcheck
+  name: Test shell scripts with shellcheck
+  description: Shell scripts conform to shellcheck
+  entry: shellcheck
+  language: python
+  types: [shell]
+  require_serial: true # shellcheck can detect sourcing this way
