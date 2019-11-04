@@ -2,7 +2,6 @@
 
 from setuptools import setup
 from setuptools.command.install import install as orig_install
-from setuptools.command.sdist import sdist as orig_sdist
 
 from distutils.core import Command
 from distutils.command.build import build as orig_build
@@ -19,7 +18,6 @@ from hashlib import sha512
 from os import makedirs
 from os import fstat
 from os import fchmod
-import errno
 
 from functools import lru_cache
 
