@@ -1,107 +1,81 @@
 #!/usr/bin/env python3
+import os.path
+import stat
+import sys
+from distutils.command.build import build as orig_build
+from distutils.core import Command
+from hashlib import sha512
+from http import HTTPStatus
+from urllib.request import urlopen
 
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-from distutils.core import Command
-from distutils.command.build import build as orig_build
-
-from os import path
-
-from sys import platform
-
-from urllib.request import urlopen
-from http import HTTPStatus
-
-from hashlib import sha512
-
-from os import makedirs
-from os import fstat
-from os import fchmod
-
-from functools import lru_cache
+SHELLCHECK_VERSION = '0.7.0'
+PY_VERSION = '1'
 
 
 def get_arch() -> str:
-    if platform == "linux" or platform == "linux2":
+    if sys.platform.startswith('linux'):
         # TODO(rhee): detect "linux-aarch64" and "linux-armv6hf"
         return 'linux-x86_64'
-    elif platform == "darwin":
+    elif sys.platform == 'darwin':
         return 'darwin-x86_64'
-    elif platform == "win32" or platform == "win64":
+    elif sys.platform == 'win32':
         return 'exe'
     else:
-        raise RuntimeError('Unsupported platform')
+        raise ValueError('Unsupported platform')
 
 
 def get_executable_name() -> str:
-    return f'shellcheck-v{get_version()}.{get_arch()}'
-
-
-@lru_cache(maxsize=1)
-def get_version() -> str:
-    with open('VERSION', 'r') as fp:
-        return fp.read().strip()
+    return f'shellcheck-v{SHELLCHECK_VERSION}.{get_arch()}'
 
 
 def get_download_url() -> str:
-    return path.join(
-        'https://storage.googleapis.com/',
-        'shellcheck',
-        get_executable_name(),
-    )
+    return f'https://storage.googleapis.com/shellcheck/{get_executable_name()}'
 
 
 def download(url: str) -> bytes:
     with urlopen(url) as resp, urlopen(url + '.sha512sum') as shasum_resp:
-
         code = resp.getcode()
         scode = shasum_resp.getcode()
         if code != HTTPStatus.OK or scode != HTTPStatus.OK:
-            raise RuntimeError(f'HTTP failure. Codes: {code}, {scode}')
+            raise ValueError(f'HTTP failure. Codes: {code}, {scode}')
 
         data = resp.read()
         actual_shasum = sha512(data).hexdigest()
-        expected_shasum = shasum_resp.read().decode('utf8').split(" ")[0]
+        expected_shasum = shasum_resp.read().decode('utf8').split(' ')[0]
 
         if expected_shasum != actual_shasum:
-            raise RuntimeError(
-                'SHA512 mismatch! '
-                f'expected "{expected_shasum}" but got "{actual_shasum}"'
+            raise ValueError(
+                f'SHA512 mismatch! '
+                f'expected "{expected_shasum}" but got "{actual_shasum}"',
             )
 
         return data
 
 
 def save_executable(data: bytes, base_dir: str):
-    out_dir = path.join(base_dir, 'bin')
-    output_path = path.join(
-        out_dir,
-        'shellcheck',
-    )
-
-    makedirs(out_dir, exist_ok=True)
+    exe = 'shellcheck' if sys.platform != 'win32' else 'shellcheck.exe'
+    output_path = os.path.join(base_dir, exe)
+    os.makedirs(base_dir)
 
     with open(output_path, 'wb') as fp:
         fp.write(data)
 
-        # Mark as executable.
-        # https://stackoverflow.com/a/14105527
-        mode = fstat(fp.fileno()).st_mode
-        mode |= 0o111
-        fchmod(fp.fileno(), mode & 0o7777)
+    # Mark as executable.
+    # https://stackoverflow.com/a/14105527
+    mode = os.stat(output_path).st_mode
+    mode |= stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+    os.chmod(output_path, mode)
 
 
 class build(orig_build):
-    sub_commands = orig_build.sub_commands + [
-        ('fetch_binaries', None),
-    ]
+    sub_commands = orig_build.sub_commands + [('fetch_binaries', None)]
 
 
 class install(orig_install):
-    sub_commands = orig_install.sub_commands + [
-        ('install_shellcheck', None),
-    ]
+    sub_commands = orig_install.sub_commands + [('install_shellcheck', None)]
 
 
 class fetch_binaries(Command):
@@ -131,7 +105,9 @@ class install_shellcheck(Command):
     def finalize_options(self):
         # this initializes attributes based on other commands' attributes
         self.set_undefined_options('build', ('build_temp', 'build_dir'))
-        self.set_undefined_options('install', ('install_data', 'install_dir'))
+        self.set_undefined_options(
+            'install', ('install_scripts', 'install_dir'),
+        )
 
     def run(self):
         self.outfiles = self.copy_tree(self.build_dir, self.install_dir)
@@ -148,7 +124,11 @@ command_overrides = {
 }
 
 
-def wheel_support():
+try:
+    from wheel.bdist_wheel import bdist_wheel as orig_bdist_wheel
+except ImportError:
+    pass
+else:
     class bdist_wheel(orig_bdist_wheel):
         def finalize_options(self):
             orig_bdist_wheel.finalize_options(self)
@@ -156,19 +136,10 @@ def wheel_support():
             self.root_is_pure = False
 
         def get_tag(self):
-            python, abi, plat = orig_bdist_wheel.get_tag(self)
+            _, _, plat = orig_bdist_wheel.get_tag(self)
             # We don't contain any python source, nor any python extensions
-            python, abi = 'py2.py3', 'none'
-            return python, abi, plat
+            return 'py2.py3', 'none', plat
 
     command_overrides['bdist_wheel'] = bdist_wheel
 
-
-try:
-    from wheel.bdist_wheel import bdist_wheel as orig_bdist_wheel
-except ImportError:
-    pass
-else:
-    wheel_support()
-
-setup(cmdclass=command_overrides)
+setup(version=f'{SHELLCHECK_VERSION}.{PY_VERSION}', cmdclass=command_overrides)
