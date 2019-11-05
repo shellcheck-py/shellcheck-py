@@ -1,6 +1,6 @@
 - id: shellcheck
-  name: Test shell scripts with shellcheck
-  description: Shell scripts conform to shellcheck
+  name: shellcheck
+  description: Test shell scripts with shellcheck
   entry: shellcheck
   language: python
   types: [shell]
