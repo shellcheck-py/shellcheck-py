@@ -1,73 +1,103 @@
 #!/usr/bin/env python3
+import io
 import os.path
+import re
 import stat
 import sys
+import tarfile
+import tempfile
+import zipfile
 from distutils.command.build import build as orig_build
 from distutils.core import Command
-from hashlib import sha512
 from http import HTTPStatus
+from typing import Dict
 from urllib.request import urlopen
 
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-SHELLCHECK_VERSION = '0.7.0'
+SHELLCHECK_VERSION = '0.7.1'
 PY_VERSION = '1'
 
 
 def get_arch() -> str:
     if sys.platform.startswith('linux'):
-        # TODO(rhee): detect "linux-aarch64" and "linux-armv6hf"
-        return 'linux-x86_64'
+        # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
+        return 'linux.x86_64.tar.xz'
     elif sys.platform == 'darwin':
-        return 'darwin-x86_64'
+        return 'darwin.x86_64.tar.xz'
     elif sys.platform == 'win32':
-        return 'exe'
+        return 'zip'
     else:
         raise ValueError('Unsupported platform')
 
 
-def get_executable_name() -> str:
+def get_artifact_name() -> str:
     return f'shellcheck-v{SHELLCHECK_VERSION}.{get_arch()}'
 
 
 def get_download_url() -> str:
-    return f'https://storage.googleapis.com/shellcheck/{get_executable_name()}'
+    return (
+        'https://github.com/koalaman/shellcheck/releases/download/'
+        f'v{SHELLCHECK_VERSION}/{get_artifact_name()}'
+    )
 
 
 def download(url: str) -> bytes:
-    with urlopen(url) as resp, urlopen(url + '.sha512sum') as shasum_resp:
+    with urlopen(url) as resp:
         code = resp.getcode()
-        scode = shasum_resp.getcode()
-        if code != HTTPStatus.OK or scode != HTTPStatus.OK:
-            raise ValueError(f'HTTP failure. Codes: {code}, {scode}')
-
-        data = resp.read()
-        actual_shasum = sha512(data).hexdigest()
-        expected_shasum = shasum_resp.read().decode('utf8').split(' ')[0]
-
-        if expected_shasum != actual_shasum:
-            raise ValueError(
-                f'SHA512 mismatch! '
-                f'expected "{expected_shasum}" but got "{actual_shasum}"',
-            )
-
-        return data
+        if code != HTTPStatus.OK:
+            raise ValueError(f'HTTP failure. Code: {code}')
+        return resp.read()
 
 
-def save_executable(data: bytes, base_dir: str):
-    exe = 'shellcheck' if sys.platform != 'win32' else 'shellcheck.exe'
-    output_path = os.path.join(base_dir, exe)
+def extract(url: str, data: bytes) -> Dict[str, bytes]:
+    result = {}
+    if '.tar.' in url:
+        tmpf = tempfile.NamedTemporaryFile(delete=False)
+        try:
+            with tmpf:
+                tmpf.write(data)
+            with tarfile.open(tmpf.name) as tar:
+                for member in (x for x in tar.getmembers() if x.isfile()):
+                    name = member.name.rpartition('\\')[2].rpartition('/')[2]
+                    result[name] = tar.extractfile(member).read()
+        finally:
+            os.remove(tmpf.name)
+    elif url.endswith('.zip'):
+        with io.BytesIO(data) as bio, zipfile.ZipFile(bio) as zipp:
+            for info in (x for x in zipp.infolist() if not x.is_dir()):
+                name = info.filename.rpartition('\\')[2].rpartition('/')[2]
+                result[name] = zipp.read(info.filename)
+    else:
+        exe = 'shellcheck' if sys.platform != 'win32' else 'shellcheck.exe'
+        result[exe] = data
+    return result
+
+
+def save_files(files: Dict[str, bytes], base_dir: str) -> None:
     os.makedirs(base_dir)
 
-    with open(output_path, 'wb') as fp:
-        fp.write(data)
+    for name, data in files.items():
+        match = re.search(
+            r'(?i)(?:^|[\/])(?P<basename>shellcheck)(?:.*?)(?P<ext>\.exe)?$',
+            name
+        )
+        is_exe = False
+        if match:
+            name = f'{match.group("basename")}{match.group("ext") or ""}'
+            is_exe = True
 
-    # Mark as executable.
-    # https://stackoverflow.com/a/14105527
-    mode = os.stat(output_path).st_mode
-    mode |= stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-    os.chmod(output_path, mode)
+        output_path = os.path.join(base_dir, name)
+        with open(output_path, 'wb') as fp:
+            fp.write(data)
+
+        if is_exe:
+            # Mark as executable.
+            # https://stackoverflow.com/a/14105527
+            mode = os.stat(output_path).st_mode
+            mode |= stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+            os.chmod(output_path, mode)
 
 
 class build(orig_build):
@@ -91,7 +121,8 @@ class fetch_binaries(Command):
         # save binary to self.build_temp
         url = get_download_url()
         data = download(url)
-        save_executable(data, self.build_temp)
+        files = extract(url, data)
+        save_files(files, self.build_temp)
 
 
 class install_shellcheck(Command):
