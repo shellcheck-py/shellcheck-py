@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/shellcheck-py/shellcheck-py/_apis/build/status/shellcheck-py.shellcheck-py?branchName=master)](https://dev.azure.com/shellcheck-py/shellcheck-py/_build/latest?definitionId=1&branchName=master)
+
 # shellcheck-py
 
 A python wrapper to provide a pip-installable [shellcheck] binary.
