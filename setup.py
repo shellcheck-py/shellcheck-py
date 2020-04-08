@@ -1,103 +1,90 @@
 #!/usr/bin/env python3
+import hashlib
+import http
 import io
 import os.path
-import re
 import stat
 import sys
 import tarfile
-import tempfile
+import urllib.request
 import zipfile
 from distutils.command.build import build as orig_build
 from distutils.core import Command
-from http import HTTPStatus
-from typing import Dict
-from urllib.request import urlopen
 
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
 SHELLCHECK_VERSION = '0.7.1'
+POSTFIX_SHA256 = {
+    # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
+    'linux': (
+        'linux.x86_64.tar.xz',
+        '64f17152d96d7ec261ad3086ed42d18232fcb65148b44571b564d688269d36c8',
+    ),
+    'darwin': (
+        'darwin.x86_64.tar.xz',
+        'b080c3b659f7286e27004aa33759664d91e15ef2498ac709a452445d47e3ac23',
+    ),
+    'win32': (
+        'zip',
+        '1763f8f4a639d39e341798c7787d360ed79c3d68a1cdbad0549c9c0767a75e98',
+    ),
+}
 PY_VERSION = '1'
 
 
-def get_arch() -> str:
-    if sys.platform.startswith('linux'):
-        # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
-        return 'linux.x86_64.tar.xz'
-    elif sys.platform == 'darwin':
-        return 'darwin.x86_64.tar.xz'
-    elif sys.platform == 'win32':
-        return 'zip'
-    else:
-        raise ValueError('Unsupported platform')
-
-
-def get_artifact_name() -> str:
-    return f'shellcheck-v{SHELLCHECK_VERSION}.{get_arch()}'
-
-
 def get_download_url() -> str:
-    return (
-        'https://github.com/koalaman/shellcheck/releases/download/'
-        f'v{SHELLCHECK_VERSION}/{get_artifact_name()}'
+    postfix, sha256 = POSTFIX_SHA256[sys.platform]
+    url = (
+        f'https://github.com/koalaman/shellcheck/releases/download/'
+        f'v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.{postfix}'
     )
+    return url, sha256
 
 
-def download(url: str) -> bytes:
-    with urlopen(url) as resp:
+def download(url: str, sha256: str) -> bytes:
+    with urllib.request.urlopen(url) as resp:
         code = resp.getcode()
-        if code != HTTPStatus.OK:
+        if code != http.HTTPStatus.OK:
             raise ValueError(f'HTTP failure. Code: {code}')
-        return resp.read()
+        data = resp.read()
+
+    checksum = hashlib.sha256(data).hexdigest()
+    if checksum != sha256:
+        raise ValueError(f'sha256 mismatch, expected {sha256}, got {checksum}')
+
+    return data
 
 
-def extract(url: str, data: bytes) -> Dict[str, bytes]:
-    result = {}
-    if '.tar.' in url:
-        tmpf = tempfile.NamedTemporaryFile(delete=False)
-        try:
-            with tmpf:
-                tmpf.write(data)
-            with tarfile.open(tmpf.name) as tar:
-                for member in (x for x in tar.getmembers() if x.isfile()):
-                    name = member.name.rpartition('\\')[2].rpartition('/')[2]
-                    result[name] = tar.extractfile(member).read()
-        finally:
-            os.remove(tmpf.name)
-    elif url.endswith('.zip'):
-        with io.BytesIO(data) as bio, zipfile.ZipFile(bio) as zipp:
-            for info in (x for x in zipp.infolist() if not x.is_dir()):
-                name = info.filename.rpartition('\\')[2].rpartition('/')[2]
-                result[name] = zipp.read(info.filename)
-    else:
-        exe = 'shellcheck' if sys.platform != 'win32' else 'shellcheck.exe'
-        result[exe] = data
-    return result
+def extract(url: str, data: bytes) -> bytes:
+    with io.BytesIO(data) as bio:
+        if '.tar.' in url:
+            with tarfile.open(fileobj=bio) as tarf:
+                for info in tarf.getmembers():
+                    if info.isfile() and info.name.endswith('shellcheck'):
+                        return tarf.extractfile(info).read()
+        elif url.endswith('.zip'):
+            with zipfile.ZipFile(bio) as zipf:
+                for info in zipf.infolist():
+                    if info.filename.endswith('.exe'):
+                        return zipf.read(info.filename)
+
+    raise AssertionError(f'unreachable {url}')
 
 
-def save_files(files: Dict[str, bytes], base_dir: str) -> None:
+def save_executable(data: bytes, base_dir: str):
+    exe = 'shellcheck' if sys.platform != 'win32' else 'shellcheck.exe'
+    output_path = os.path.join(base_dir, exe)
     os.makedirs(base_dir)
 
-    for name, data in files.items():
-        match = re.search(
-            r'(?i)(?:^|[\/])(?P<basename>shellcheck)(?:.*?)(?P<ext>\.exe)?$',
-            name
-        )
-        is_exe = False
-        if match:
-            name = f'{match.group("basename")}{match.group("ext") or ""}'
-            is_exe = True
+    with open(output_path, 'wb') as fp:
+        fp.write(data)
 
-        output_path = os.path.join(base_dir, name)
-        with open(output_path, 'wb') as fp:
-            fp.write(data)
-
-        if is_exe:
-            # Mark as executable.
-            # https://stackoverflow.com/a/14105527
-            mode = os.stat(output_path).st_mode
-            mode |= stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-            os.chmod(output_path, mode)
+    # Mark as executable.
+    # https://stackoverflow.com/a/14105527
+    mode = os.stat(output_path).st_mode
+    mode |= stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+    os.chmod(output_path, mode)
 
 
 class build(orig_build):
@@ -119,10 +106,10 @@ class fetch_binaries(Command):
 
     def run(self):
         # save binary to self.build_temp
-        url = get_download_url()
-        data = download(url)
-        files = extract(url, data)
-        save_files(files, self.build_temp)
+        url, sha256 = get_download_url()
+        archive = download(url, sha256)
+        data = extract(url, archive)
+        save_executable(data, self.build_temp)
 
 
 class install_shellcheck(Command):
