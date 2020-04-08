@@ -1,58 +1,75 @@
 #!/usr/bin/env python3
+import hashlib
+import http
+import io
 import os.path
 import stat
 import sys
+import tarfile
+import urllib.request
+import zipfile
 from distutils.command.build import build as orig_build
 from distutils.core import Command
-from hashlib import sha512
-from http import HTTPStatus
-from urllib.request import urlopen
 
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-SHELLCHECK_VERSION = '0.7.0'
+SHELLCHECK_VERSION = '0.7.1'
+POSTFIX_SHA256 = {
+    # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
+    'linux': (
+        'linux.x86_64.tar.xz',
+        '64f17152d96d7ec261ad3086ed42d18232fcb65148b44571b564d688269d36c8',
+    ),
+    'darwin': (
+        'darwin.x86_64.tar.xz',
+        'b080c3b659f7286e27004aa33759664d91e15ef2498ac709a452445d47e3ac23',
+    ),
+    'win32': (
+        'zip',
+        '1763f8f4a639d39e341798c7787d360ed79c3d68a1cdbad0549c9c0767a75e98',
+    ),
+}
 PY_VERSION = '1'
 
 
-def get_arch() -> str:
-    if sys.platform.startswith('linux'):
-        # TODO(rhee): detect "linux-aarch64" and "linux-armv6hf"
-        return 'linux-x86_64'
-    elif sys.platform == 'darwin':
-        return 'darwin-x86_64'
-    elif sys.platform == 'win32':
-        return 'exe'
-    else:
-        raise ValueError('Unsupported platform')
-
-
-def get_executable_name() -> str:
-    return f'shellcheck-v{SHELLCHECK_VERSION}.{get_arch()}'
-
-
 def get_download_url() -> str:
-    return f'https://storage.googleapis.com/shellcheck/{get_executable_name()}'
+    postfix, sha256 = POSTFIX_SHA256[sys.platform]
+    url = (
+        f'https://github.com/koalaman/shellcheck/releases/download/'
+        f'v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.{postfix}'
+    )
+    return url, sha256
 
 
-def download(url: str) -> bytes:
-    with urlopen(url) as resp, urlopen(url + '.sha512sum') as shasum_resp:
+def download(url: str, sha256: str) -> bytes:
+    with urllib.request.urlopen(url) as resp:
         code = resp.getcode()
-        scode = shasum_resp.getcode()
-        if code != HTTPStatus.OK or scode != HTTPStatus.OK:
-            raise ValueError(f'HTTP failure. Codes: {code}, {scode}')
-
+        if code != http.HTTPStatus.OK:
+            raise ValueError(f'HTTP failure. Code: {code}')
         data = resp.read()
-        actual_shasum = sha512(data).hexdigest()
-        expected_shasum = shasum_resp.read().decode('utf8').split(' ')[0]
 
-        if expected_shasum != actual_shasum:
-            raise ValueError(
-                f'SHA512 mismatch! '
-                f'expected "{expected_shasum}" but got "{actual_shasum}"',
-            )
+    checksum = hashlib.sha256(data).hexdigest()
+    if checksum != sha256:
+        raise ValueError(f'sha256 mismatch, expected {sha256}, got {checksum}')
 
-        return data
+    return data
+
+
+def extract(url: str, data: bytes) -> bytes:
+    with io.BytesIO(data) as bio:
+        if '.tar.' in url:
+            with tarfile.open(fileobj=bio) as tarf:
+                for info in tarf.getmembers():
+                    if info.isfile() and info.name.endswith('shellcheck'):
+                        return tarf.extractfile(info).read()
+        elif url.endswith('.zip'):
+            with zipfile.ZipFile(bio) as zipf:
+                for info in zipf.infolist():
+                    if info.filename.endswith('.exe'):
+                        return zipf.read(info.filename)
+
+    raise AssertionError(f'unreachable {url}')
 
 
 def save_executable(data: bytes, base_dir: str):
@@ -89,8 +106,9 @@ class fetch_binaries(Command):
 
     def run(self):
         # save binary to self.build_temp
-        url = get_download_url()
-        data = download(url)
+        url, sha256 = get_download_url()
+        archive = download(url, sha256)
+        data = extract(url, archive)
         save_executable(data, self.build_temp)
 
 
