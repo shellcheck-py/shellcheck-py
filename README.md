@@ -3,7 +3,8 @@
 
 # shellcheck-py
 
-A python wrapper to provide a pip-installable [shellcheck] binary.
+Run shellcheck in pre-commit even if the host machine doesn't have it installed!
+`shellcheck-py` is a python wrapper to provide a pip-installable [shellcheck] binary.
 
 Internally this package provides a convenient way to download the pre-built
 shellcheck binary for your particular platform.
