@@ -14,20 +14,20 @@ from distutils.core import Command
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-SHELLCHECK_VERSION = '0.7.1'
+SHELLCHECK_VERSION = '0.7.2'
 POSTFIX_SHA256 = {
     # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
     'linux': (
         'linux.x86_64.tar.xz',
-        '64f17152d96d7ec261ad3086ed42d18232fcb65148b44571b564d688269d36c8',
+        '70423609f27b504d6c0c47e340f33652aea975e45f312324f2dbf91c95a3b188',
     ),
     'darwin': (
         'darwin.x86_64.tar.xz',
-        'b080c3b659f7286e27004aa33759664d91e15ef2498ac709a452445d47e3ac23',
+        '969bd7ef668e8167cfbba569fb9f4a0b2fc1c4021f87032b6a0b0e525fb77369',
     ),
     'win32': (
         'zip',
-        '1763f8f4a639d39e341798c7787d360ed79c3d68a1cdbad0549c9c0767a75e98',
+        '1b80bbb525e6d64961afff09fb4a9199a62d5e22347a9c92c151a791131467bd',
     ),
 }
 PY_VERSION = '1'
