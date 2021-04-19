@@ -10,6 +10,7 @@ import urllib.request
 import zipfile
 from distutils.command.build import build as orig_build
 from distutils.core import Command
+from typing import Tuple
 
 from setuptools import setup
 from setuptools.command.install import install as orig_install
@@ -33,7 +34,7 @@ POSTFIX_SHA256 = {
 PY_VERSION = '1'
 
 
-def get_download_url() -> str:
+def get_download_url() -> Tuple[str, str]:
     postfix, sha256 = POSTFIX_SHA256[sys.platform]
     url = (
         f'https://github.com/koalaman/shellcheck/releases/download/'
