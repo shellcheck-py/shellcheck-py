@@ -1,17 +1,18 @@
-[![Build Status](https://dev.azure.com/shellcheck-py/shellcheck-py/_apis/build/status/shellcheck-py.shellcheck-py?branchName=master)](https://dev.azure.com/shellcheck-py/shellcheck-py/_build/latest?definitionId=1&branchName=master)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/shellcheck-py/shellcheck-py/master.svg)](https://results.pre-commit.ci/latest/github/shellcheck-py/shellcheck-py/master)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/MaxWinterstein/shfmt-py/master.svg)](https://results.pre-commit.ci/latest/github/MaxWinterstein/shfmt-py/master)
 
-# shellcheck-py
+# shfmt-py
 
-A python wrapper to provide a pip-installable [shellcheck] binary.
+A python wrapper to provide a pip-installable [shfmt] binary.
 
 Internally this package provides a convenient way to download the pre-built
 shellcheck binary for your particular platform.
 
+This package is totally cloned from [shellcheck-py] and modified to provide `shfmt` instead.
+
 ### installation
 
 ```bash
-pip install shellcheck-py
+pip install shfmt-py
 ```
 
 ### usage
@@ -26,11 +27,12 @@ See [pre-commit] for instructions
 Sample `.pre-commit-config.yaml`:
 
 ```yaml
--   repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.7.2.1
+-   repo: https://github.com/maxwinterstein/shfmt-py
+    rev: v3.3.1
     hooks:
-    -   id: shellcheck
+    -   id: shfmt
 ```
 
-[shellcheck]: https://shellcheck.net
+[shfmt]: https://github.com/mvdan/sh
 [pre-commit]: https://pre-commit.com
+[shellcheck-py]: https://github.com/shellcheck-py/shellcheck-py

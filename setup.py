@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 import hashlib
 import http
-import io
 import os.path
 import stat
 import sys
-import tarfile
 import urllib.request
-import zipfile
 from distutils.command.build import build as orig_build
 from distutils.core import Command
 from typing import Tuple
@@ -15,31 +12,32 @@ from typing import Tuple
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-SHELLCHECK_VERSION = '0.7.2'
+SHFMT_VERSION = 'v3.3.1'
 POSTFIX_SHA256 = {
     # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
     'linux': (
-        'linux.x86_64.tar.xz',
-        '70423609f27b504d6c0c47e340f33652aea975e45f312324f2dbf91c95a3b188',
+        'linux_amd64',
+        '0f73bf27219571bca7c5ef7d740d6ae72227e3995ffd88c7cb2b5712751538e2',
     ),
     'darwin': (
-        'darwin.x86_64.tar.xz',
-        '969bd7ef668e8167cfbba569fb9f4a0b2fc1c4021f87032b6a0b0e525fb77369',
+        'darwin_amd64',
+        'ade755f37fd470e176536593a72394bbf543c80e0256eb937c3c09d1f4b2a55d',
     ),
     'win32': (
-        'zip',
-        '1b80bbb525e6d64961afff09fb4a9199a62d5e22347a9c92c151a791131467bd',
+        'windows_amd64.exe',
+        'aa116e5437a7e03c137bea0331177a91f98735094ef0ca2ffcfd6be2a3d61765',
     ),
 }
-PY_VERSION = '1'
+PY_VERSION = '3'
 
 
 def get_download_url() -> Tuple[str, str]:
     postfix, sha256 = POSTFIX_SHA256[sys.platform]
     url = (
-        f'https://github.com/koalaman/shellcheck/releases/download/'
-        f'v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.{postfix}'
+        f'https://github.com/mvdan/sh/releases/download/'
+        f'{SHFMT_VERSION}/shfmt_{SHFMT_VERSION}_{postfix}'
     )
+    print(url)
     return url, sha256
 
 
@@ -57,24 +55,8 @@ def download(url: str, sha256: str) -> bytes:
     return data
 
 
-def extract(url: str, data: bytes) -> bytes:
-    with io.BytesIO(data) as bio:
-        if '.tar.' in url:
-            with tarfile.open(fileobj=bio) as tarf:
-                for info in tarf.getmembers():
-                    if info.isfile() and info.name.endswith('shellcheck'):
-                        return tarf.extractfile(info).read()
-        elif url.endswith('.zip'):
-            with zipfile.ZipFile(bio) as zipf:
-                for info in zipf.infolist():
-                    if info.filename.endswith('.exe'):
-                        return zipf.read(info.filename)
-
-    raise AssertionError(f'unreachable {url}')
-
-
 def save_executable(data: bytes, base_dir: str):
-    exe = 'shellcheck' if sys.platform != 'win32' else 'shellcheck.exe'
+    exe = 'shfmt' if sys.platform != 'win32' else 'shfmt.exe'
     output_path = os.path.join(base_dir, exe)
     os.makedirs(base_dir)
 
@@ -93,7 +75,7 @@ class build(orig_build):
 
 
 class install(orig_install):
-    sub_commands = orig_install.sub_commands + [('install_shellcheck', None)]
+    sub_commands = orig_install.sub_commands + [('install_shfmt', None)]
 
 
 class fetch_binaries(Command):
@@ -108,13 +90,12 @@ class fetch_binaries(Command):
     def run(self):
         # save binary to self.build_temp
         url, sha256 = get_download_url()
-        archive = download(url, sha256)
-        data = extract(url, archive)
+        data = download(url, sha256)
         save_executable(data, self.build_temp)
 
 
-class install_shellcheck(Command):
-    description = 'install the shellcheck executable'
+class install_shfmt(Command):
+    description = 'install the shfmt executable'
     outfiles = ()
     build_dir = install_dir = None
 
@@ -137,7 +118,7 @@ class install_shellcheck(Command):
 
 command_overrides = {
     'install': install,
-    'install_shellcheck': install_shellcheck,
+    'install_shfmt': install_shfmt,
     'build': build,
     'fetch_binaries': fetch_binaries,
 }
@@ -161,4 +142,4 @@ else:
 
     command_overrides['bdist_wheel'] = bdist_wheel
 
-setup(version=f'{SHELLCHECK_VERSION}.{PY_VERSION}', cmdclass=command_overrides)
+setup(version=f'{SHFMT_VERSION}.{PY_VERSION}', cmdclass=command_overrides)
