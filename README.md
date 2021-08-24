@@ -17,8 +17,8 @@ pip install shfmt-py
 
 ### usage
 
-After installation, the `shellcheck` binary should be available in your
-environment (or `shellcheck.exe` on windows).
+After installation, the `shfmt` binary should be available in your
+environment (or `shfmt.exe` on windows).
 
 ### As a pre-commit hook
 
@@ -28,7 +28,7 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 -   repo: https://github.com/maxwinterstein/shfmt-py
-    rev: v3.3.1.4
+    rev: v3.3.1.5
     hooks:
     -   id: shfmt
 ```

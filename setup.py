@@ -28,7 +28,7 @@ POSTFIX_SHA256 = {
         'aa116e5437a7e03c137bea0331177a91f98735094ef0ca2ffcfd6be2a3d61765',
     ),
 }
-PY_VERSION = '4'
+PY_VERSION = '5'
 
 
 def get_download_url() -> Tuple[str, str]:
