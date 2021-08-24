@@ -1,4 +1,3 @@
-[![Build Status](https://dev.azure.com/shellcheck-py/shellcheck-py/_apis/build/status/shellcheck-py.shellcheck-py?branchName=master)](https://dev.azure.com/shellcheck-py/shellcheck-py/_build/latest?definitionId=1&branchName=master)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/MaxWinterstein/shfmt-py/master.svg)](https://results.pre-commit.ci/latest/github/MaxWinterstein/shfmt-py/master)
 
 # shfmt-py
