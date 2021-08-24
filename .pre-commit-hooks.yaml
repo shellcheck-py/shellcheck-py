@@ -1,7 +1,7 @@
-- id: shellcheck
-  name: shellcheck
-  description: Test shell scripts with shellcheck
-  entry: shellcheck
+- id: shfmt
+  name: shfmt
+  description: Format shell scripts with shfmt
+  entry: shfmt
   language: python
   types: [shell]
-  require_serial: true # shellcheck can detect sourcing this way
+  require_serial: true # shfmt can detect sourcing this way
