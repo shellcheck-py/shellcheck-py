@@ -4,4 +4,5 @@
   entry: shfmt
   language: python
   types: [shell]
+  args: [-w] # write file back
   require_serial: true # shfmt can detect sourcing this way
