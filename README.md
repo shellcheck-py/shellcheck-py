@@ -9,30 +9,39 @@ shellcheck binary for your particular platform.
 
 This package is totally cloned from [shellcheck-py] and modified to provide `shfmt` instead.
 
-### installation
+## Installation
 
 ```bash
 pip install shfmt-py
 ```
 
-### usage
+## Usage
+
+### CLI
 
 After installation, the `shfmt` binary should be available in your
 environment (or `shfmt.exe` on windows).
 
-### As a pre-commit hook
+### As pre-commit hook
 
 See [pre-commit] for instructions
 
 Sample `.pre-commit-config.yaml`:
 
 ```yaml
-  - repo: https://github.com/maxwinterstein/shfmt-py
-    rev: v3.3.1.7
-    hooks:
-      - id: shfmt
+- repo: https://github.com/maxwinterstein/shfmt-py
+  rev: v3.3.1.7
+  hooks:
+    - id: shfmt
 ```
+
+## FAQ
+
+Q: I get something like `SSL: CERTIFICATE_VERIFY_FAILED` on macOS
+A: Install certificates with e.g.: `"/Applications/Python 3.9/Install Certificates.command"`. See [here][here1] or [here][here2] for
 
 [shfmt]: https://github.com/mvdan/sh
 [pre-commit]: https://pre-commit.com
 [shellcheck-py]: https://github.com/shellcheck-py/shellcheck-py
+[here1]: https://github.com/albertogeniola/MerossIot/issues/62#issuecomment-535769621
+[here2]: https://stackoverflow.com/questions/27835619/urllib-and-ssl-certificate-verify-failed-error
