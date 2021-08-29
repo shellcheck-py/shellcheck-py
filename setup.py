@@ -12,7 +12,7 @@ from typing import Tuple
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-SHFMT_VERSION = 'v3.3.1'
+SHFMT_VERSION = '3.3.1'
 POSTFIX_SHA256 = {
     # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
     'linux': (
@@ -28,14 +28,14 @@ POSTFIX_SHA256 = {
         'aa116e5437a7e03c137bea0331177a91f98735094ef0ca2ffcfd6be2a3d61765',
     ),
 }
-PY_VERSION = '7'
+PY_VERSION = '8'
 
 
 def get_download_url() -> Tuple[str, str]:
     postfix, sha256 = POSTFIX_SHA256[sys.platform]
     url = (
         f'https://github.com/mvdan/sh/releases/download/'
-        f'{SHFMT_VERSION}/shfmt_{SHFMT_VERSION}_{postfix}'
+        f'v{SHFMT_VERSION}/shfmt_v{SHFMT_VERSION}_{postfix}'
     )
     print(url)
     return url, sha256

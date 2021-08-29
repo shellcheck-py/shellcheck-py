@@ -30,7 +30,7 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 - repo: https://github.com/maxwinterstein/shfmt-py
-  rev: v3.3.1.7
+  rev: 3.3.1.8
   hooks:
     - id: shfmt
 ```
