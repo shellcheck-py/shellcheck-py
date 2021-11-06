@@ -44,7 +44,7 @@ def get_download_url() -> Tuple[str, str]:
 
 
 def download(url: str, sha256: str) -> bytes:
-    with urllib.request.urlopen(url) as resp:
+    with urllib.request.urlopen(url, timeout=10.0) as resp:
         code = resp.getcode()
         if code != http.HTTPStatus.OK:
             raise ValueError(f'HTTP failure. Code: {code}')
