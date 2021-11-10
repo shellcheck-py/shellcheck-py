@@ -15,20 +15,20 @@ from typing import Tuple
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-SHELLCHECK_VERSION = '0.7.2'
+SHELLCHECK_VERSION = '0.8.0'
 POSTFIX_SHA256 = {
     # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
     'linux': (
         'linux.x86_64.tar.xz',
-        '70423609f27b504d6c0c47e340f33652aea975e45f312324f2dbf91c95a3b188',
+        'ab6ee1b178f014d1b86d1e24da20d1139656c8b0ed34d2867fbb834dad02bf0a',
     ),
     'darwin': (
         'darwin.x86_64.tar.xz',
-        '969bd7ef668e8167cfbba569fb9f4a0b2fc1c4021f87032b6a0b0e525fb77369',
+        'e065d4afb2620cc8c1d420a9b3e6243c84ff1a693c1ff0e38f279c8f31e86634',
     ),
     'win32': (
         'zip',
-        '1b80bbb525e6d64961afff09fb4a9199a62d5e22347a9c92c151a791131467bd',
+        '2a616cbb5b15aec8238f22c0d62dede1b6d155798adc45ff4d0206395a8a5833',
     ),
 }
 PY_VERSION = '1'
