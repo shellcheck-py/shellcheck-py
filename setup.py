@@ -3,6 +3,7 @@ import hashlib
 import http
 import io
 import os.path
+import platform
 import stat
 import sys
 import tarfile
@@ -17,26 +18,31 @@ from setuptools.command.install import install as orig_install
 
 SHELLCHECK_VERSION = '0.8.0'
 POSTFIX_SHA256 = {
-    # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
-    'linux': (
+    # TODO: detect "linux.armv6hf"
+    ('linux', 'aarch64'): (
+        'linux.aarch64.tar.xz',
+        'a12bdfe0f95811ad6c0a091006b919b2834b0619b460cfa596f557edd62e45ab',
+    ),
+    ('linux', 'x86_64'): (
         'linux.x86_64.tar.xz',
         'ab6ee1b178f014d1b86d1e24da20d1139656c8b0ed34d2867fbb834dad02bf0a',
     ),
-    'darwin': (
+    ('darwin', 'x86_64'): (
         'darwin.x86_64.tar.xz',
         'e065d4afb2620cc8c1d420a9b3e6243c84ff1a693c1ff0e38f279c8f31e86634',
     ),
-    'win32': (
+    ('win32', 'AMD64'): (
         'zip',
         '2a616cbb5b15aec8238f22c0d62dede1b6d155798adc45ff4d0206395a8a5833',
     ),
 }
-POSTFIX_SHA256['cygwin'] = POSTFIX_SHA256['win32']
+POSTFIX_SHA256[('cygwin', 'x86_64')] = POSTFIX_SHA256[('win32', 'AMD64')]
+POSTFIX_SHA256[('darwin', 'arm64')] = POSTFIX_SHA256[('darwin', 'x86_64')]
 PY_VERSION = '1'
 
 
 def get_download_url() -> Tuple[str, str]:
-    postfix, sha256 = POSTFIX_SHA256[sys.platform]
+    postfix, sha256 = POSTFIX_SHA256[(sys.platform, platform.machine())]
     url = (
         f'https://github.com/koalaman/shellcheck/releases/download/'
         f'v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.{postfix}'
