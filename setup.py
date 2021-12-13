@@ -31,6 +31,7 @@ POSTFIX_SHA256 = {
         '2a616cbb5b15aec8238f22c0d62dede1b6d155798adc45ff4d0206395a8a5833',
     ),
 }
+POSTFIX_SHA256['cygwin'] = POSTFIX_SHA256['win32']
 PY_VERSION = '1'
 
 
