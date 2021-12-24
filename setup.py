@@ -21,7 +21,7 @@ POSTFIX_SHA256 = {
     # TODO: detect "linux.armv6hf"
     ('linux', 'aarch64'): (
         'linux.aarch64.tar.xz',
-        'a12bdfe0f95811ad6c0a091006b919b2834b0619b460cfa596f557edd62e45ab',
+        '9f47bbff5624babfa712eb9d64ece14c6c46327122d0c54983f627ae3a30a4ac',
     ),
     ('linux', 'x86_64'): (
         'linux.x86_64.tar.xz',
