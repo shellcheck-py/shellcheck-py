@@ -18,7 +18,10 @@ from setuptools.command.install import install as orig_install
 
 SHELLCHECK_VERSION = '0.8.0'
 POSTFIX_SHA256 = {
-    # TODO: detect "linux.armv6hf"
+    ('linux', 'armv6hf'): (
+        'linux.armv6hf.tar.xz',
+        '17857c8a0a8f4001aa9638732991cbb6e85c4a410500b11e2e0a98d9858afca8',
+    ),
     ('linux', 'aarch64'): (
         'linux.aarch64.tar.xz',
         '9f47bbff5624babfa712eb9d64ece14c6c46327122d0c54983f627ae3a30a4ac',
@@ -38,6 +41,7 @@ POSTFIX_SHA256 = {
 }
 POSTFIX_SHA256[('cygwin', 'x86_64')] = POSTFIX_SHA256[('win32', 'AMD64')]
 POSTFIX_SHA256[('darwin', 'arm64')] = POSTFIX_SHA256[('darwin', 'x86_64')]
+POSTFIX_SHA256[('linux', 'armv7l')] = POSTFIX_SHA256[('linux', 'armv6hf')]
 PY_VERSION = '3'
 
 
