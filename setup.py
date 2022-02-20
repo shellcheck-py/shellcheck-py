@@ -5,27 +5,27 @@ import os.path
 import stat
 import sys
 import urllib.request
-from distutils.command.build import build as orig_build
-from distutils.core import Command
 from typing import Tuple
 
+from distutils.command.build import build as orig_build
+from distutils.core import Command
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-SHFMT_VERSION = '3.3.1'
+SHFMT_VERSION = '3.4.3'
 POSTFIX_SHA256 = {
     # TODO(rhee): detect "linux.aarch64" and "linux.armv6hf"
     'linux': (
         'linux_amd64',
-        '0f73bf27219571bca7c5ef7d740d6ae72227e3995ffd88c7cb2b5712751538e2',
+        '713ef49db9a60a00636814a507da851b58da6b4b98a3627188fba0a61b60f9a8',
     ),
     'darwin': (
         'darwin_amd64',
-        'ade755f37fd470e176536593a72394bbf543c80e0256eb937c3c09d1f4b2a55d',
+        '22af685075e0448861c5db111e70cc399bdc95cdd7def943bc5adb6783f3e530',
     ),
     'win32': (
         'windows_amd64.exe',
-        'aa116e5437a7e03c137bea0331177a91f98735094ef0ca2ffcfd6be2a3d61765',
+        'a6c317a68dddf8efa9fd87d985a807cf7ab2423871d390aac4d3775691565835',
     ),
 }
 PY_VERSION = '8'
