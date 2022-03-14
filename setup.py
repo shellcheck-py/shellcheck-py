@@ -9,10 +9,10 @@ import sys
 import tarfile
 import urllib.request
 import zipfile
-from distutils.command.build import build as orig_build
-from distutils.core import Command
 from typing import Tuple
 
+from distutils.command.build import build as orig_build
+from distutils.core import Command
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
