@@ -11,7 +11,6 @@ import sys
 import tarfile
 import urllib.request
 import zipfile
-from typing import Tuple
 
 from distutils.command.build import build as orig_build
 from distutils.core import Command
