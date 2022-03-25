@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import hashlib
 import http
 import io
@@ -9,7 +11,6 @@ import sys
 import tarfile
 import urllib.request
 import zipfile
-from typing import Tuple
 
 from distutils.command.build import build as orig_build
 from distutils.core import Command
@@ -45,7 +46,7 @@ POSTFIX_SHA256[('linux', 'armv7l')] = POSTFIX_SHA256[('linux', 'armv6hf')]
 PY_VERSION = '4'
 
 
-def get_download_url() -> Tuple[str, str]:
+def get_download_url() -> tuple[str, str]:
     postfix, sha256 = POSTFIX_SHA256[(sys.platform, platform.machine())]
     url = (
         f'https://github.com/koalaman/shellcheck/releases/download/'
