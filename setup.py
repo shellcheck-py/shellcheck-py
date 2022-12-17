@@ -17,27 +17,27 @@ from distutils.core import Command
 from setuptools import setup
 from setuptools.command.install import install as orig_install
 
-SHELLCHECK_VERSION = '0.8.0'
+SHELLCHECK_VERSION = '0.9.0'
 POSTFIX_SHA256 = {
     ('linux', 'armv6hf'): (
         'linux.armv6hf.tar.xz',
-        '17857c8a0a8f4001aa9638732991cbb6e85c4a410500b11e2e0a98d9858afca8',
+        '03deed9ded9dd66434ccf9649815bcde7d275d6c9f6dcf665b83391673512c75',
     ),
     ('linux', 'aarch64'): (
         'linux.aarch64.tar.xz',
-        '9f47bbff5624babfa712eb9d64ece14c6c46327122d0c54983f627ae3a30a4ac',
+        '179c579ef3481317d130adebede74a34dbbc2df961a70916dd4039ebf0735fae',
     ),
     ('linux', 'x86_64'): (
         'linux.x86_64.tar.xz',
-        'ab6ee1b178f014d1b86d1e24da20d1139656c8b0ed34d2867fbb834dad02bf0a',
+        '700324c6dd0ebea0117591c6cc9d7350d9c7c5c287acbad7630fa17b1d4d9e2f',
     ),
     ('darwin', 'x86_64'): (
         'darwin.x86_64.tar.xz',
-        'e065d4afb2620cc8c1d420a9b3e6243c84ff1a693c1ff0e38f279c8f31e86634',
+        '7d3730694707605d6e60cec4efcb79a0632d61babc035aa16cda1b897536acf5',
     ),
     ('win32', 'AMD64'): (
         'zip',
-        '2a616cbb5b15aec8238f22c0d62dede1b6d155798adc45ff4d0206395a8a5833',
+        'ae58191b1ea4ffd9e5b15da9134146e636440302ce3e2f46863e8d71c8be1bbb',
     ),
 }
 POSTFIX_SHA256[('cygwin', 'x86_64')] = POSTFIX_SHA256[('win32', 'AMD64')]
