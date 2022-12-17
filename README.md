@@ -27,7 +27,7 @@ Sample `.pre-commit-config.yaml`:
 
 ```yaml
 -   repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.1
+    rev: v0.9.0.2
     hooks:
     -   id: shellcheck
 ```
