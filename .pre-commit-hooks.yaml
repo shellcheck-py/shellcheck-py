@@ -1,7 +1,7 @@
-- id: shellcheck
-  name: shellcheck
-  description: Test shell scripts with shellcheck
-  entry: shellcheck
+- id: actionlint
+  name: actionlint
+  description: Check GitHub workflow files with actionlint
+  entry: actionlint
   language: python
   types: [shell]
-  require_serial: true # shellcheck can detect sourcing this way
+  # require_serial: true # shellcheck can detect sourcing this way
