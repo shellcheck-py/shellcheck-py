@@ -11,13 +11,13 @@ import sys
 import tarfile
 import urllib.request
 import zipfile
+from os import environ
+from urllib.parse import urljoin
 
 from distutils.command.build import build as orig_build
 from distutils.core import Command
-from os import environ
 from setuptools import setup
 from setuptools.command.install import install as orig_install
-from urllib.parse import urljoin
 
 SHELLCHECK_VERSION = '0.9.0'
 POSTFIX_SHA256 = {
@@ -50,10 +50,11 @@ PY_VERSION = '2'
 
 def get_download_url() -> tuple[str, str]:
     postfix, sha256 = POSTFIX_SHA256[(sys.platform, platform.machine())]
-    base_github_url = environ.get("GITHUB_URL", "https://github.com")
-    url = urljoin(base_github_url,
+    base_github_url = environ.get('GITHUB_URL', 'https://github.com')
+    url = urljoin(
+        base_github_url,
         f'koalaman/shellcheck/releases/download/'
-        f'v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.{postfix}'
+        f'v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.{postfix}',
     )
     return url, sha256
 
