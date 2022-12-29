@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/shellcheck-py/shellcheck-py/_apis/build/status/shellcheck-py.shellcheck-py?branchName=main)](https://dev.azure.com/shellcheck-py/shellcheck-py/_build/latest?definitionId=1&branchName=main)
+[![build status](https://github.com/shellcheck-py/shellcheck-py/actions/workflows/main.yml/badge.svg)](https://github.com/shellcheck-py/shellcheck-py/actions/workflows/main.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/shellcheck-py/shellcheck-py/main.svg)](https://results.pre-commit.ci/latest/github/shellcheck-py/shellcheck-py/main)
 
 # shellcheck-py

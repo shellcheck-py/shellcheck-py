@@ -1,0 +1,26 @@
+name: main
+
+on:
+  push:
+    branches: [main, test-me-*]
+    tags:
+  pull_request:
+
+jobs:
+  main-windows:
+    uses: asottile/workflows/.github/workflows/tox.yml@v1.0.0
+    with:
+      env: '["py38"]'
+      os: windows-latest
+      wheel-tags: true
+  main-macos:
+    uses: asottile/workflows/.github/workflows/tox.yml@v1.0.0
+    with:
+      env: '["py38"]'
+      os: macos-latest
+      wheel-tags: true
+  main-linux:
+    uses: asottile/workflows/.github/workflows/tox.yml@v1.0.0
+    with:
+      env: '["py38"]'
+      os: ubuntu-latest
