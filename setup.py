@@ -49,7 +49,7 @@ PY_VERSION = '5'
 def get_download_url() -> tuple[str, str]:
     postfix, sha256 = POSTFIX_SHA256[(sys.platform, platform.machine())]
     url = (
-        f'https://github.com/koalaman/shellcheck/releases/download/'
+        'https://github.com/koalaman/shellcheck/releases/download/'
         f'v{SHELLCHECK_VERSION}/shellcheck-v{SHELLCHECK_VERSION}.{postfix}'
     )
     return url, sha256
