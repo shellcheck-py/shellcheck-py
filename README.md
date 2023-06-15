@@ -8,13 +8,13 @@ A python wrapper to provide a pip-installable [shellcheck] binary.
 Internally this package provides a convenient way to download the pre-built
 shellcheck binary for your particular platform.
 
-### installation
+### Installation
 
 ```bash
 pip install shellcheck-py
 ```
 
-### usage
+### Usage
 
 After installation, the `shellcheck` binary should be available in your
 environment (or `shellcheck.exe` on windows).
