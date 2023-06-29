@@ -56,7 +56,8 @@ def get_download_url() -> tuple[str, str]:
 
 
 def download(url: str, sha256: str) -> bytes:
-    with urllib.request.urlopen(url) as resp:
+    req = urllib.request.Request(url, headers={'User-Agent': 'curl/8.0.0'})
+    with urllib.request.urlopen(req) as resp:
         code = resp.getcode()
         if code != http.HTTPStatus.OK:
             raise ValueError(f'HTTP failure. Code: {code}')
