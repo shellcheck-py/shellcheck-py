@@ -19,19 +19,19 @@ repos:
     -   id: reorder-python-imports
         args: [--py38-plus, --add-import, 'from __future__ import annotations']
 -   repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.0.0
+    rev: v3.0.1
     hooks:
     -   id: add-trailing-comma
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.9.0
+    rev: v3.10.1
     hooks:
     -   id: pyupgrade
         args: [--py38-plus]
 -   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v2.0.2
+    rev: v2.0.4
     hooks:
     -   id: autopep8
 -   repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 6.1.0
     hooks:
     -   id: flake8
