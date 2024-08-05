@@ -23,7 +23,7 @@ repos:
     hooks:
     -   id: add-trailing-comma
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v3.16.0
+    rev: v3.17.0
     hooks:
     -   id: pyupgrade
         args: [--py38-plus]
@@ -32,6 +32,6 @@ repos:
     hooks:
     -   id: autopep8
 -   repo: https://github.com/PyCQA/flake8
-    rev: 7.1.0
+    rev: 7.1.1
     hooks:
     -   id: flake8
