@@ -3,7 +3,7 @@ from __future__ import annotations
 from setuptools import setup
 
 try:
-    from wheel.bdist_wheel import bdist_wheel as orig_bdist_wheel
+    from setuptools.command.bdist_wheel import bdist_wheel as orig_bdist_wheel
 except ImportError:
     cmdclass = {}
 else:
