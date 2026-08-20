@@ -4,4 +4,5 @@
   entry: shellcheck
   language: python
   types: [shell]
+  exclude_types: [zsh]
   require_serial: true # shellcheck can detect sourcing this way
